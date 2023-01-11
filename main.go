@@ -228,8 +228,8 @@ func main() {
 	fmt.Fprintf(os.Stderr, "Config: %s", config)
 	//fmt.Fprintf(os.Stderr, "Book: %s", book)
 
-	for _, section := range book.Sections {
-		err = replaceContent(&section.Chapter)
+	for i := range book.Sections {
+		err = replaceContent(&book.Sections[i].Chapter)
 		if err != nil {
 			log.Fatal(err)
 		}
