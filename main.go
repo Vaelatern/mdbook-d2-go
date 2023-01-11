@@ -150,7 +150,7 @@ func rewriteD2(whoami *blackfriday.Node, entering bool) blackfriday.WalkStatus {
 		newNode.Type = blackfriday.BlockQuote
 		newNode.Literal = []byte(fmt.Sprintf("Error parsing the below code block into d2: %s", err))
 		whoami.InsertBefore(newNode)
-		log.Println("Errored on the d2 path")
+		log.Println("Error parsing code block into d2: %s", err)
 		return blackfriday.GoToNext
 	}
 	newText := wrapSvgInDiv(newSvg)
@@ -159,7 +159,7 @@ func rewriteD2(whoami *blackfriday.Node, entering bool) blackfriday.WalkStatus {
 	newNode.Literal = newText
 	whoami.InsertBefore(newNode)
 	whoami.Unlink()
-	log.Println("Success on the d2 path")
+	log.Println("Found and processed a d2 graph")
 	return blackfriday.GoToNext
 }
 
