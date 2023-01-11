@@ -96,7 +96,7 @@ func wrapSvgInDiv(in []byte) []byte {
 	totalLen := len(start) + len(in) + len(end)
 	finalSlice := make([]byte, totalLen)
 	position := copy(finalSlice[0:], []byte(start))
-	position += copy(finalSlice[position:], []byte(start))
+	position += copy(finalSlice[position:], in)
 	position += copy(finalSlice[position:], []byte(end))
 	return finalSlice
 }
