@@ -82,11 +82,13 @@ func generateSvgFromD2(graph string) ([]byte, error) {
 	out, err := d2svg.Render(diagram, &d2svg.RenderOpts{
 		Pad: d2svg.DEFAULT_PADDING,
 	})
-
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+
+	outWithoutConfusingMarkdown := bytes.ReplaceAll(out, []byte("\n\n"), []byte("\n"))
+
+	return outWithoutConfusingMarkdown, nil
 }
 
 // needed because markdown only respects the html tags it knows, maybe not <svg>
@@ -155,7 +157,7 @@ func rewriteD2(whoami *blackfriday.Node, entering bool) blackfriday.WalkStatus {
 	}
 	newText := wrapSvgInDiv(newSvg)
 	newNode := new(blackfriday.Node)
-	newNode.Type = blackfriday.HTMLSpan
+	newNode.Type = blackfriday.HTMLBlock
 	newNode.Literal = newText
 	whoami.InsertBefore(newNode)
 	whoami.Unlink()
