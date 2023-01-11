@@ -15,7 +15,6 @@ import (
 	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
 	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2renderers/d2svg"
-	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
 	"oss.terrastruct.com/d2/lib/textmeasure"
 )
 
@@ -33,7 +32,8 @@ type Config struct {
 			// Config I'm expecting goes here
 			// Unmarshal will leave what we don't have as null
 			D2_Go struct {
-				Layout string `json:"layout"`
+				Layout  string `json:"layout"`
+				ThemeId int64  `json:"theme_id"`
 			} `json:"d2-go"`
 		} `json:"preprocessor"`
 	} `json:"config"`
@@ -61,7 +61,7 @@ type Book struct {
 	Sections      []Chapter   `json:"sections"`
 }
 
-func generateSvgFromD2(graph string) ([]byte, error) {
+func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 	ruler, err := textmeasure.NewRuler()
 	defaultLayout := func(ctx context.Context, g *d2graph.Graph) error {
 		return d2elklayout.Layout(ctx, g, nil)
@@ -73,7 +73,7 @@ func generateSvgFromD2(graph string) ([]byte, error) {
 	diagram, _, err := d2lib.Compile(context.Background(), graph, &d2lib.CompileOptions{
 		Layout:  defaultLayout,
 		Ruler:   ruler,
-		ThemeID: d2themescatalog.GrapeSoda.ID,
+		ThemeID: config.Config.Preprocessor.D2_Go.ThemeId,
 	})
 	if err != nil {
 		return nil, err
@@ -137,35 +137,37 @@ func parseStdin() (Config, Book, error) {
 	return config, book, nil
 }
 
-func rewriteD2(whoami *blackfriday.Node, entering bool) blackfriday.WalkStatus {
-	if whoami.Type != blackfriday.CodeBlock {
-		return blackfriday.GoToNext
-	}
+func rewriteD2(config Config) blackfriday.NodeVisitor {
+	return func(whoami *blackfriday.Node, entering bool) blackfriday.WalkStatus {
+		if whoami.Type != blackfriday.CodeBlock {
+			return blackfriday.GoToNext
+		}
 
-	if !bytes.Equal(whoami.CodeBlockData.Info, []byte("d2")) {
-		return blackfriday.GoToNext
-	}
+		if !bytes.Equal(whoami.CodeBlockData.Info, []byte("d2")) {
+			return blackfriday.GoToNext
+		}
 
-	newSvg, err := generateSvgFromD2(string(whoami.Literal))
-	if err != nil {
+		newSvg, err := generateSvgFromD2(config, string(whoami.Literal))
+		if err != nil {
+			newNode := new(blackfriday.Node)
+			newNode.Type = blackfriday.BlockQuote
+			newNode.Literal = []byte(fmt.Sprintf("Error parsing the below code block into d2: %s", err))
+			whoami.InsertBefore(newNode)
+			log.Println("Error parsing code block into d2: %s", err)
+			return blackfriday.GoToNext
+		}
+		newText := wrapSvgInDiv(newSvg)
 		newNode := new(blackfriday.Node)
-		newNode.Type = blackfriday.BlockQuote
-		newNode.Literal = []byte(fmt.Sprintf("Error parsing the below code block into d2: %s", err))
+		newNode.Type = blackfriday.HTMLBlock
+		newNode.Literal = newText
 		whoami.InsertBefore(newNode)
-		log.Println("Error parsing code block into d2: %s", err)
+		whoami.Unlink()
+		log.Println("Found and processed a d2 graph")
 		return blackfriday.GoToNext
 	}
-	newText := wrapSvgInDiv(newSvg)
-	newNode := new(blackfriday.Node)
-	newNode.Type = blackfriday.HTMLBlock
-	newNode.Literal = newText
-	whoami.InsertBefore(newNode)
-	whoami.Unlink()
-	log.Println("Found and processed a d2 graph")
-	return blackfriday.GoToNext
 }
 
-func fromMarkdownThroughD2ToMarkdown(content []byte) ([]byte, error) {
+func fromMarkdownThroughD2ToMarkdown(config Config, content []byte) ([]byte, error) {
 	renderToMarkdown := markdown.NewRenderer(nil)
 	opts := []blackfriday.Option{
 		blackfriday.WithRenderer(renderToMarkdown),
@@ -179,7 +181,7 @@ func fromMarkdownThroughD2ToMarkdown(content []byte) ([]byte, error) {
 	parser := blackfriday.New(opts...)
 	root := parser.Parse(content)
 
-	root.Walk(rewriteD2)
+	root.Walk(rewriteD2(config))
 
 	var buf bytes.Buffer
 	renderToMarkdown.RenderHeader(&buf, root)
@@ -190,14 +192,14 @@ func fromMarkdownThroughD2ToMarkdown(content []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func replaceContent(bookItem *BookItem) error {
-	newContent, err := fromMarkdownThroughD2ToMarkdown([]byte(bookItem.Content))
+func replaceContent(config Config, bookItem *BookItem) error {
+	newContent, err := fromMarkdownThroughD2ToMarkdown(config, []byte(bookItem.Content))
 	if err != nil {
 		return err
 	}
 	bookItem.Content = string(newContent)
 	for i := range bookItem.SubItems {
-		err = replaceContent(&bookItem.SubItems[i].Chapter)
+		err = replaceContent(config, &bookItem.SubItems[i].Chapter)
 		if err != nil {
 			return err
 		}
@@ -231,7 +233,7 @@ func main() {
 	log.Println("Config: %s", config)
 
 	for i := range book.Sections {
-		err = replaceContent(&book.Sections[i].Chapter)
+		err = replaceContent(config, &book.Sections[i].Chapter)
 		if err != nil {
 			log.Fatal(err)
 		}
