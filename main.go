@@ -47,8 +47,8 @@ type BookItem struct {
 	Name        string        `json:"name"`
 	Number      []int         `json:"number"`
 	ParentNames []interface{} `json:"parent_names"`
-	Path        string        `json:"path"`
-	SourcePath  string        `json:"source_path"`
+	Path        *string       `json:"path"`
+	SourcePath  *string       `json:"source_path"`
 	SubItems    []Chapter     `json:"sub_items"`
 }
 
