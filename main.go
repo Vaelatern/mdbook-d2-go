@@ -204,6 +204,7 @@ func replaceContent(bookItem *BookItem) error {
 }
 
 func main() {
+	log.SetOutput(os.Stderr)
 	var usage = func() {
 		fmt.Println("This should be used as documented at https://rust-lang.github.io/mdBook/for_developers/preprocessors.html")
 		os.Exit(1)
@@ -225,8 +226,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintf(os.Stderr, "Config: %s", config)
-	//fmt.Fprintf(os.Stderr, "Book: %s", book)
+	log.Println("Config: %s", config)
 
 	for i := range book.Sections {
 		err = replaceContent(&book.Sections[i].Chapter)
@@ -234,11 +234,11 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	//fmt.Fprintf(os.Stderr, "NewBook: %s", book)
 
 	outStr, err := json.Marshal(book)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(string(outStr))
+	log.Println("Finished printing d2 processed JSON")
 }
