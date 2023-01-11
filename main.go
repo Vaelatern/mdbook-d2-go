@@ -196,8 +196,8 @@ func replaceContent(bookItem *BookItem) error {
 		return err
 	}
 	bookItem.Content = string(newContent)
-	for _, subItem := range bookItem.SubItems {
-		err = replaceContent(&subItem.Chapter)
+	for i := range bookItem.SubItems {
+		err = replaceContent(&bookItem.SubItems[i].Chapter)
 		if err != nil {
 			return err
 		}
