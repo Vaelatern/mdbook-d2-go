@@ -137,7 +137,7 @@ func parseStdin() (Config, Book, error) {
 	return config, book, nil
 }
 
-func rewriteD2(config Config) blackfriday.NodeVisitor {
+func rewriteD2(config Config, unlink_chan chan<- *blackfriday.Node) blackfriday.NodeVisitor {
 	return func(whoami *blackfriday.Node, entering bool) blackfriday.WalkStatus {
 		if whoami.Type != blackfriday.CodeBlock {
 			return blackfriday.GoToNext
@@ -161,7 +161,7 @@ func rewriteD2(config Config) blackfriday.NodeVisitor {
 		newNode.Type = blackfriday.HTMLBlock
 		newNode.Literal = newText
 		whoami.InsertBefore(newNode)
-		whoami.Unlink()
+		unlink_chan <- whoami
 		log.Println("Found and processed a d2 graph")
 		return blackfriday.GoToNext
 	}
@@ -181,7 +181,23 @@ func fromMarkdownThroughD2ToMarkdown(config Config, content []byte) ([]byte, err
 	parser := blackfriday.New(opts...)
 	root := parser.Parse(content)
 
-	root.Walk(rewriteD2(config))
+	unlinking_channel := make(chan *blackfriday.Node)
+	go func() {
+		root.Walk(rewriteD2(config, unlinking_channel))
+		close(unlinking_channel)
+	}()
+
+	node_to_unlink := <-unlinking_channel
+	// avoid races by being sure the walk already has a Next Node before we remove any nodes
+	// This does expect that we do not have any parent nodes in the nodes we are processing.
+	for next_node_to_unlink := range unlinking_channel {
+		node_to_unlink.Unlink()
+		node_to_unlink = next_node_to_unlink
+	}
+	// what if we were never sent any nodes, or were only sent one?
+	if node_to_unlink != nil {
+		node_to_unlink.Unlink()
+	}
 
 	var buf bytes.Buffer
 	renderToMarkdown.RenderHeader(&buf, root)
