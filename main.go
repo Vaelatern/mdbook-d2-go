@@ -86,9 +86,10 @@ func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 		return nil, err
 	}
 
-	outWithoutConfusingMarkdown := bytes.ReplaceAll(out, []byte("\n\n"), []byte("\n"))
+	outWithoutConfusingHtml := bytes.ReplaceAll(out, []byte("id=\"d2-svg\""), []byte(""))
+	outWithoutConfusingHtmlOrMarkdown := bytes.ReplaceAll(outWithoutConfusingHtml, []byte("\n\n"), []byte("\n"))
 
-	return outWithoutConfusingMarkdown, nil
+	return outWithoutConfusingHtmlOrMarkdown, nil
 }
 
 // needed because markdown only respects the html tags it knows, maybe not <svg>
