@@ -18,6 +18,8 @@ layout = "elk"
 theme_id = 0
 ```
 
+Check out the `example-with-d2` folder for a working mdbook example.
+
 ### Keeping SVGs skinny
 
 Your SVGs will be full size when loaded in mdbook by default.
