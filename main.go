@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/jsternberg/markdownfmt/markdown"
-	blackfriday "gopkg.in/russross/blackfriday.v2"
+	"github.com/Vaelatern/markdownfmt/markdown"
+	blackfriday "github.com/russross/blackfriday/v2"
 
 	"oss.terrastruct.com/d2/d2graph"
 	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
@@ -71,16 +71,16 @@ func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 	}
 
 	diagram, _, err := d2lib.Compile(context.Background(), graph, &d2lib.CompileOptions{
-		Layout:  defaultLayout,
-		Ruler:   ruler,
-		ThemeID: config.Config.Preprocessor.D2_Go.ThemeId,
+		Layout: defaultLayout,
+		Ruler:  ruler,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	out, err := d2svg.Render(diagram, &d2svg.RenderOpts{
-		Pad: d2svg.DEFAULT_PADDING,
+		Pad:     d2svg.DEFAULT_PADDING,
+		ThemeID: config.Config.Preprocessor.D2_Go.ThemeId,
 	})
 	if err != nil {
 		return nil, err
