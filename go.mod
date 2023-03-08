@@ -5,13 +5,14 @@ go 1.19
 require (
 	github.com/Vaelatern/markdownfmt v0.0.0-20230228015747-3694198c3809
 	github.com/russross/blackfriday/v2 v2.1.0
-	oss.terrastruct.com/d2 v0.2.1
+	oss.terrastruct.com/d2 v0.2.4
 )
 
 require (
 	cdr.dev/slog v1.4.2-0.20221206192828-e4803b10ae17 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
+	github.com/alecthomas/chroma/v2 v2.5.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/dop251/goja v0.0.0-20230226152633-7c93113e17ac // indirect
@@ -37,5 +38,5 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gonum.org/v1/plot v0.12.0 // indirect
-	oss.terrastruct.com/util-go v0.0.0-20230227232021-19333fdc525a // indirect
+	oss.terrastruct.com/util-go v0.0.0-20230305220024-ae08a694f221 // indirect
 )
