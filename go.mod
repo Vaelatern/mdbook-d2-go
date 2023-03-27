@@ -14,6 +14,8 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.5.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
+	github.com/carlmjohnson/deque v0.22.0 // indirect
+	github.com/carlmjohnson/workgroup v0.23.1 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/dop251/goja v0.0.0-20230226152633-7c93113e17ac // indirect
 	github.com/fatih/color v1.14.1 // indirect

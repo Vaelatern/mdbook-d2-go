@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/Vaelatern/markdownfmt/markdown"
+	"github.com/carlmjohnson/workgroup"
 	blackfriday "github.com/russross/blackfriday/v2"
 
 	"oss.terrastruct.com/d2/d2graph"
@@ -215,13 +216,15 @@ func replaceContent(config Config, bookItem *BookItem) error {
 		return err
 	}
 	bookItem.Content = string(newContent)
-	for i := range bookItem.SubItems {
-		err = replaceContent(config, &bookItem.SubItems[i].Chapter)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
+}
+
+func locateContent(config Config, bookItem *BookItem, foundContent []*BookItem) []*BookItem {
+	foundContent = append(foundContent, bookItem)
+	for i := range bookItem.SubItems {
+		foundContent = locateContent(config, &bookItem.SubItems[i].Chapter, foundContent)
+	}
+	return foundContent
 }
 
 func main() {
@@ -249,11 +252,16 @@ func main() {
 
 	log.Println("Config: %s", config)
 
+	foundContent := make([]*BookItem, 0)
 	for i := range book.Sections {
-		err = replaceContent(config, &book.Sections[i].Chapter)
-		if err != nil {
-			log.Fatal(err)
-		}
+		foundContent = locateContent(config, &book.Sections[i].Chapter, foundContent)
+	}
+	err = workgroup.DoTasks(workgroup.MaxProcs, foundContent, func(content *BookItem) error {
+		err := replaceContent(config, content)
+		return err
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	outStr, err := json.Marshal(book)
