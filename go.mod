@@ -6,7 +6,7 @@ require (
 	github.com/Vaelatern/markdownfmt v0.0.0-20230228015747-3694198c3809
 	github.com/carlmjohnson/workgroup v0.23.1
 	github.com/russross/blackfriday/v2 v2.1.0
-	oss.terrastruct.com/d2 v0.4.0
+	oss.terrastruct.com/d2 v0.5.1
 )
 
 require (
@@ -22,7 +22,6 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/jung-kurt/gofpdf v1.16.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
@@ -41,5 +40,5 @@ require (
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gonum.org/v1/plot v0.12.0 // indirect
-	oss.terrastruct.com/util-go v0.0.0-20230320053557-dcb5aac7d972 // indirect
+	oss.terrastruct.com/util-go v0.0.0-20230604222829-11c3c60fec14 // indirect
 )
