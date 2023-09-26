@@ -71,18 +71,26 @@ func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 		return nil, err
 	}
 
-	diagram, _, err := d2lib.Compile(context.Background(), graph, &d2lib.CompileOptions{
+	renderOpts := d2svg.RenderOpts{
+		Pad:         d2svg.DEFAULT_PADDING,
+		Sketch:      false,
+		Center:      false,
+		ThemeID:     config.Config.Preprocessor.D2_Go.ThemeId,
+		DarkThemeID: config.Config.Preprocessor.D2_Go.ThemeId,
+		Scale:       1,
+	}
+
+	compileOpts := d2lib.CompileOptions{
 		Layout: defaultLayout,
 		Ruler:  ruler,
-	})
+	}
+
+	diagram, _, err := d2lib.Compile(context.Background(), graph, &compileOpts, &renderOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	out, err := d2svg.Render(diagram, &d2svg.RenderOpts{
-		Pad:     d2svg.DEFAULT_PADDING,
-		ThemeID: config.Config.Preprocessor.D2_Go.ThemeId,
-	})
+	out, err := d2svg.Render(diagram, &renderOpts)
 	if err != nil {
 		return nil, err
 	}
