@@ -12,8 +12,6 @@ import (
 	"github.com/carlmjohnson/workgroup"
 	blackfriday "github.com/russross/blackfriday/v2"
 
-	"oss.terrastruct.com/d2/d2graph"
-	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
 	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2renderers/d2svg"
 	"oss.terrastruct.com/d2/lib/textmeasure"
@@ -64,24 +62,29 @@ type Book struct {
 
 func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 	ruler, err := textmeasure.NewRuler()
-	defaultLayout := func(ctx context.Context, g *d2graph.Graph) error {
-		return d2elklayout.Layout(ctx, g, nil)
-	}
 	if err != nil {
 		return nil, err
 	}
 
+	defaultLayout := "elk"
+
+	var padding_default int64 = d2svg.DEFAULT_PADDING
+	var theme_id int64 = config.Config.Preprocessor.D2_Go.ThemeId
+
 	diagram, _, err := d2lib.Compile(context.Background(), graph, &d2lib.CompileOptions{
-		Layout: defaultLayout,
+		Layout: &defaultLayout,
 		Ruler:  ruler,
+	}, &d2svg.RenderOpts{
+		Pad:     &padding_default,
+		ThemeID: &theme_id,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	out, err := d2svg.Render(diagram, &d2svg.RenderOpts{
-		Pad:     d2svg.DEFAULT_PADDING,
-		ThemeID: config.Config.Preprocessor.D2_Go.ThemeId,
+		Pad:     &padding_default,
+		ThemeID: &theme_id,
 	})
 	if err != nil {
 		return nil, err
