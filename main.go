@@ -7,13 +7,21 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/Vaelatern/markdownfmt/markdown"
 	"github.com/carlmjohnson/workgroup"
 	blackfriday "github.com/russross/blackfriday/v2"
 
+	"cdr.dev/slog"
+	"cdr.dev/slog/sloggers/sloghuman"
+
+	"oss.terrastruct.com/d2/d2graph"
+	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
+	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
 	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2renderers/d2svg"
+	d2log "oss.terrastruct.com/d2/lib/log"
 	"oss.terrastruct.com/d2/lib/textmeasure"
 )
 
@@ -68,24 +76,33 @@ func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 
 	defaultLayout := "elk"
 
+	layoutResolver := func(engine string) (d2graph.LayoutGraph, error) {
+		if strings.EqualFold(engine, "elk") {
+			return d2elklayout.DefaultLayout, nil
+		}
+		return d2dagrelayout.DefaultLayout, nil
+	}
+
 	var padding_default int64 = d2svg.DEFAULT_PADDING
 	var theme_id int64 = config.Config.Preprocessor.D2_Go.ThemeId
 
-	diagram, _, err := d2lib.Compile(context.Background(), graph, &d2lib.CompileOptions{
-		Layout: &defaultLayout,
-		Ruler:  ruler,
-	}, &d2svg.RenderOpts{
+	render_opts := d2svg.RenderOpts{
 		Pad:     &padding_default,
 		ThemeID: &theme_id,
-	})
+	}
+	log := slog.Make(sloghuman.Sink(os.Stderr))
+	ctx := d2log.With(context.Background(), log)
+
+	diagram, _, err := d2lib.Compile(ctx, graph, &d2lib.CompileOptions{
+		Layout:         &defaultLayout,
+		LayoutResolver: layoutResolver,
+		Ruler:          ruler,
+	}, &render_opts)
 	if err != nil {
 		return nil, err
 	}
 
-	out, err := d2svg.Render(diagram, &d2svg.RenderOpts{
-		Pad:     &padding_default,
-		ThemeID: &theme_id,
-	})
+	out, err := d2svg.Render(diagram, &render_opts)
 	if err != nil {
 		return nil, err
 	}
