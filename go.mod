@@ -9,7 +9,7 @@ require (
 	github.com/Vaelatern/markdownfmt v0.0.0-20230228015747-3694198c3809
 	github.com/carlmjohnson/workgroup v0.23.1
 	github.com/russross/blackfriday/v2 v2.1.0
-	oss.terrastruct.com/d2 v0.6.5
+	oss.terrastruct.com/d2 v0.6.6
 )
 
 require (
