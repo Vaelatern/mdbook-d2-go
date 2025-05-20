@@ -13,9 +13,6 @@ import (
 	"github.com/carlmjohnson/workgroup"
 	blackfriday "github.com/russross/blackfriday/v2"
 
-	"cdr.dev/slog"
-	"cdr.dev/slog/sloggers/sloghuman"
-
 	"oss.terrastruct.com/d2/d2graph"
 	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
 	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
@@ -90,8 +87,7 @@ func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 		Pad:     &padding_default,
 		ThemeID: &theme_id,
 	}
-	log := slog.Make(sloghuman.Sink(os.Stderr))
-	ctx := d2log.With(context.Background(), log)
+	ctx := d2log.WithDefault(context.Background())
 
 	diagram, _, err := d2lib.Compile(ctx, graph, &d2lib.CompileOptions{
 		Layout:         &defaultLayout,
