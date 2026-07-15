@@ -62,7 +62,7 @@ type Chapter struct {
 
 type Book struct {
 	NonExhaustive interface{} `json:"__non_exhaustive"`
-	Sections      []Chapter   `json:"sections"`
+	Items         []Chapter   `json:"items"`
 }
 
 func generateSvgFromD2(config Config, graph string) ([]byte, error) {
@@ -269,8 +269,8 @@ func main() {
 	log.Println("Config: %s", config)
 
 	foundContent := make([]*BookItem, 0)
-	for i := range book.Sections {
-		foundContent = locateContent(config, &book.Sections[i].Chapter, foundContent)
+	for i := range book.Items {
+		foundContent = locateContent(config, &book.Items[i].Chapter, foundContent)
 	}
 	err = workgroup.DoTasks(workgroup.MaxProcs, foundContent, func(content *BookItem) error {
 		err := replaceContent(config, content)
