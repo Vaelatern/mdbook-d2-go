@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/void-linux/void-linux:20220530rc01-mini-x86_64-musl AS prep
+FROM ghcr.io/void-linux/void-musl:20260901R1 AS prep
 RUN xbps-install -MSuy xbps
 RUN xbps-install -MSuy go
 
