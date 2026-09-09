@@ -16,6 +16,7 @@ import (
 	"github.com/d2lang/d2/d2graph"
 	"github.com/d2lang/d2/d2layouts/d2dagrelayout"
 	"github.com/d2lang/d2/d2layouts/d2elklayout"
+	"github.com/d2lang/d2/d2layouts/d2talalayout"
 	"github.com/d2lang/d2/d2lib"
 	"github.com/d2lang/d2/d2renderers/d2svg"
 	d2log "github.com/d2lang/d2/lib/log"
@@ -77,10 +78,9 @@ func generateSvgFromD2(config Config, graph string) ([]byte, error) {
 		if strings.EqualFold(engine, "elk") {
 			return d2elklayout.DefaultLayout, nil
 		}
-		// This is open sourced next version...
-		// if strings.EqualFold(engine, "tala") {
-		// 	return d2talalayout.DefaultLayout, nil
-		// }
+		if strings.EqualFold(engine, "tala") {
+			return d2talalayout.DefaultLayout, nil
+		}
 		return d2dagrelayout.DefaultLayout, nil
 	}
 
